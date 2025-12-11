@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin - Ma Famille</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Poppins", sans-serif;
+        background: #f0f5ff;
+        color: #333;
+        margin: 0;
+        padding: 30px;
+      }
+      h1 {
+        color: #8e44ad;
+        text-align: center;
+        margin: 40px 0;
+        font-size: 40px;
+      }
+      .section {
+        margin: 40px 0;
+        background: white;
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 15px 40px rgba(142, 68, 173, 0.15);
+      }
+      h2 {
+        color: #8e44ad;
+        font-size: 28px;
+        margin-bottom: 25px;
+        border-bottom: 3px solid #9b59b6;
+        padding-bottom: 10px;
+      }
+      .item {
+        background: #f8f9ff;
+        padding: 20px;
+        margin: 15px 0;
+        border-radius: 15px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      }
+      .user-id {
+        font-weight: 700;
+        color: #8e44ad;
+      }
+      .btn {
+        background: #9b59b6;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        margin: 5px;
+      }
+      .btn-danger {
+        background: #e74c3c;
+      }
+      .photo-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 20px;
+      }
+      .photo-item img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 15px;
+      }
+      .empty {
+        text-align: center;
+        color: #999;
+        font-style: italic;
+        padding: 60px;
+        font-size: 18px;
+      }
+      .logout-btn {
+        display: block;
+        margin: 50px auto;
+        background: #9b59b6;
+        padding: 15px 40px;
+        font-size: 18px;
+        border-radius: 50px;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Admin Panel — Vue Complète</h1>
+    <div id="content">
+      <div class="empty">Vérification des droits...</div>
+    </div>
+    <button class="logout-btn" onclick="logout()">Déconnexion Admin</button>
+
+    <script type="module">
+      import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+      const supabase = createClient(
+        "https://tvwhnguyzhioamvnuoqu.supabase.co",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2d2huZ3V5emhpb2Ftdm51b3F1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0MzIwNDcsImV4cCI6MjA4MTAwODA0N30.MZIPOZrz5E-o5CWbM7MIkyj8EANNh9MCpIRQQLTi4CY"
+      );
+
+      // Lancement direct sans attendre onAuthStateChange
+      (async () => {
+        try {
+          const {
+            data: { user },
+          } = await supabase.auth.getUser();
+          if (!user) {
+            alert("Vous devez être connecté");
+            location.href = "index.html";
+            return;
+          }
+
+          // Vérifie le rôle admin
+          const { data: profile, error } = await supabase
+            .from("profiles")
+            .select("role")
+            .eq("id", user.id)
+            .single();
+
+          if (error || !profile || profile.role !== "admin") {
+            alert("Accès refusé — Admin uniquement");
+            location.href = "index.html";
+            return;
+          }
+
+          // Si on arrive ici → c'est un admin → on charge tout
+          await loadAdminData();
+        } catch (err) {
+          document.getElementById("content").innerHTML =
+            '<p style="color:red;">Erreur de connexion Supabase</p>';
+          console.error(err);
+        }
+      })();
+
+      async function loadAdminData() {
+        const c = document.getElementById("content");
+        c.innerHTML = '<div class="empty">Chargement des données...</div>';
+
+        let html = "";
+
+        // 1. Arbres familiaux
+        html += `<div class="section"><h2>Arbres Familiaux</h2>`;
+        const { data: trees } = await supabase.from("family_tree").select("*");
+        if (trees && trees.length > 0) {
+          trees.forEach((t) => {
+            html += `<div class="item">
+            <span class="user-id">User ${t.user_id.slice(0, 8)}...</span> → ${
+              t.name
+            } (${t.gender === "male" ? "Homme" : "Femme"})
+            <button class="btn-danger" onclick="del('family_tree','${
+              t.id
+            }')">Supprimer</button>
+          </div>`;
+          });
+        } else html += '<p class="empty">Aucun arbre familial</p>';
+        html += `</div>`;
+
+        // 2. Galerie Photos
+        html += `<div class="section"><h2>Galerie Photos</h2><div class="photo-grid" id="adminPhotos">Chargement...</div></div>`;
+
+        // 3. Moments
+        html += `<div class="section"><h2>Meilleurs Moments</h2>`;
+        const { data: moments } = await supabase
+          .from("family_moments")
+          .select("*")
+          .order("created_at", { ascending: false });
+        if (moments && moments.length > 0) {
+          moments.forEach((m) => {
+            html += `<div class="item">
+            <span class="user-id">User ${m.user_id.slice(
+              0,
+              8
+            )}...</span> — ${new Date(m.created_at).toLocaleDateString("fr")}
+            <p>${m.text || "(sans texte)"}</p>
+            ${
+              m.photo_url
+                ? `<img src="${m.photo_url}" style="width:100%;max-width:500px;border-radius:15px;margin:15px 0;">`
+                : ""
+            }
+            <button class="btn-danger" onclick="del('family_moments','${
+              m.id
+            }')">Supprimer</button>
+          </div>`;
+          });
+        } else html += '<p class="empty">Aucun moment partagé</p>';
+        html += `</div>`;
+
+        c.innerHTML = html;
+        loadAdminPhotos();
+      }
+
+      async function loadAdminPhotos() {
+        const { data } = await supabase.storage
+          .from("family-photos")
+          .list("photos");
+        const grid = document.getElementById("adminPhotos");
+        if (!data || data.length === 0) {
+          grid.innerHTML = '<p class="empty">Aucune photo</p>';
+          return;
+        }
+        grid.innerHTML = "";
+        data.forEach((f) => {
+          const url = supabase.storage
+            .from("family-photos")
+            .getPublicUrl(`photos/${f.name}`).data.publicUrl;
+          const div = document.createElement("div");
+          div.className = "photo-item";
+          div.innerHTML = `<img src="${url}">
+          <button class="btn-danger" style="width:100%;margin-top:10px;" onclick="delPhoto('photos/${f.name}')">
+            Supprimer
+          </button>`;
+          grid.appendChild(div);
+        });
+      }
+
+      window.del = async (table, id) => {
+        if (confirm("Supprimer définitivement ?")) {
+          await supabase.from(table).delete().eq("id", id);
+          location.reload();
+        }
+      };
+
+      window.delPhoto = async (path) => {
+        if (confirm("Supprimer cette photo ?")) {
+          await supabase.storage.from("family-photos").remove([path]);
+          location.reload();
+        }
+      };
+
+      window.logout = async () => {
+        await supabase.auth.signOut();
+        location.href = "index.html";
+      };
+    </script>
+  </body>
+</html>
