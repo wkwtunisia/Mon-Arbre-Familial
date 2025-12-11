@@ -56,7 +56,6 @@
           opacity: 0.1;
         }
       }
-
       .login-box {
         position: relative;
         z-index: 10;
@@ -254,7 +253,7 @@
         <span id="btnText">Se connecter</span>
       </button>
 
-      <p class="message" id="message"></p>
+      <p id="message"></p>
     </div>
 
     <script type="module">
@@ -324,7 +323,10 @@
           if (!email || password.length < 6)
             return showError("Email + mot de passe ≥ 6 caractères");
 
-          const { error } = await supabase.auth.signUp({ email, password });
+          const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+          });
           if (error) showError(error.message);
           else showSuccess("Compte créé ! Vous pouvez vous connecter");
         }
