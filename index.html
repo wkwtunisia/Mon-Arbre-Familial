@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mon Arbre Familial</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+    <style>
+      :root {
+        --primary: #2d6a4f;
+        --accent: #40916c;
+        --light: #95d5b2;
+        --dark: #1b4332;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Poppins", sans-serif;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #1b4332, #2d6a4f, #40916c);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+      }
+      body::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(
+          circle at 50% 50%,
+          rgba(255, 255, 255, 0.1),
+          transparent 70%
+        );
+        z-index: 1;
+        animation: pulse 8s infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 0.3;
+        }
+        50% {
+          opacity: 0.1;
+        }
+      }
+
+      .login-box {
+        position: relative;
+        z-index: 10;
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(22px);
+        border-radius: 28px;
+        padding: 55px 50px;
+        width: 90%;
+        max-width: 480px;
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        text-align: center;
+      }
+      .logo {
+        font-size: 100px;
+        color: var(--light);
+        margin-bottom: 15px;
+        animation: grow 3s ease-in-out infinite alternate;
+      }
+      @keyframes grow {
+        0% {
+          transform: scale(1);
+        }
+        100% {
+          transform: scale(1.12);
+        }
+      }
+      h1 {
+        font-family: "Playfair Display", serif;
+        font-size: 38px;
+        margin: 10px 0 8px;
+        text-shadow: 0 3px 12px rgba(0, 0, 0, 0.4);
+      }
+      .toggle {
+        display: flex;
+        justify-content: center;
+        margin: 35px 0 25px;
+        background: rgba(255, 255, 255, 0.18);
+        border-radius: 50px;
+        padding: 8px;
+      }
+      .toggle-btn {
+        padding: 14px 35px;
+        border-radius: 50px;
+        font-size: 18px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.4s;
+        flex: 1;
+      }
+      .toggle-btn.active {
+        background: white;
+        color: var(--dark);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      }
+      .form-group {
+        position: relative;
+        margin: 25px 0;
+      }
+      .form-group input {
+        width: 100%;
+        padding: 20px 20px 20px 60px;
+        border: none;
+        border-radius: 50px;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        font-size: 17px;
+        outline: none;
+        transition: 0.4s;
+      }
+      .form-group input::placeholder {
+        color: rgba(255, 255, 255, 0.85);
+      }
+      .form-group input:focus {
+        background: rgba(255, 255, 255, 0.3);
+        box-shadow: 0 0 35px rgba(149, 213, 178, 0.6);
+      }
+      .form-group i {
+        position: absolute;
+        left: 22px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--light);
+        font-size: 22px;
+      }
+      button#mainBtn {
+        width: 100%;
+        padding: 20px;
+        background: linear-gradient(45deg, var(--light), #74c69d);
+        color: var(--dark);
+        border: none;
+        border-radius: 50px;
+        font-size: 20px;
+        font-weight: 700;
+        cursor: pointer;
+        margin-top: 20px;
+        box-shadow: 0 18px 45px rgba(149, 213, 178, 0.6);
+        transition: 0.4s;
+      }
+      button#mainBtn:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 30px 60px rgba(149, 213, 178, 0.8);
+      }
+      button#mainBtn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
+      .spinner {
+        display: none;
+        width: 26px;
+        height: 26px;
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-top: 4px solid white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-right: 15px;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      .message {
+        color: #fff;
+        padding: 15px;
+        border-radius: 18px;
+        margin-top: 25px;
+        font-size: 16px;
+      }
+      .error {
+        background: rgba(231, 76, 96, 0.3);
+      }
+      .success {
+        background: rgba(149, 213, 178, 0.3);
+      }
+      @media (max-width: 480px) {
+        .login-box {
+          padding: 45px 35px;
+        }
+        .logo {
+          font-size: 80px;
+        }
+        h1 {
+          font-size: 34px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-box">
+      <div class="logo">Tree</div>
+      <h1>Mon Arbre Familial</h1>
+      <p id="subtitle">Connectez-vous à vos souvenirs</p>
+
+      <div class="toggle">
+        <div class="toggle-btn active" id="loginTab">Connexion</div>
+        <div class="toggle-btn" id="signupTab">Inscription</div>
+      </div>
+
+      <div id="loginForm">
+        <div class="form-group">
+          <i class="fas fa-envelope"></i
+          ><input type="email" id="loginEmail" placeholder="Email" />
+        </div>
+        <div class="form-group">
+          <i class="fas fa-lock"></i
+          ><input
+            type="password"
+            id="loginPassword"
+            placeholder="Mot de passe"
+          />
+        </div>
+      </div>
+
+      <div id="signupForm" style="display: none">
+        <div class="form-group">
+          <i class="fas fa-envelope"></i
+          ><input type="email" id="signupEmail" placeholder="Email" />
+        </div>
+        <div class="form-group">
+          <i class="fas fa-lock"></i
+          ><input
+            type="password"
+            id="signupPassword"
+            placeholder="Mot de passe (6+ caractères)"
+          />
+        </div>
+      </div>
+
+      <button id="mainBtn">
+        <span class="spinner" id="spinner"></span>
+        <span id="btnText">Se connecter</span>
+      </button>
+
+      <p class="message" id="message"></p>
+    </div>
+
+    <script type="module">
+      import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+      const supabase = createClient(
+        "https://tvwhnguyzhioamvnuoqu.supabase.co",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2d2huZ3V5emhpb2Ftdm51b3F1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0MzIwNDcsImV4cCI6MjA4MTAwODA0N30.MZIPOZrz5E-o5CWbM7MIkyj8EANNh9MCpIRQQLTi4CY"
+      );
+
+      const loginTab = document.getElementById("loginTab");
+      const signupTab = document.getElementById("signupTab");
+      const loginForm = document.getElementById("loginForm");
+      const signupForm = document.getElementById("signupForm");
+      const mainBtn = document.getElementById("mainBtn");
+      const btnText = document.getElementById("btnText");
+      const spinner = document.getElementById("spinner");
+      const message = document.getElementById("message");
+      const subtitle = document.getElementById("subtitle");
+
+      loginTab.onclick = () => {
+        loginTab.classList.add("active");
+        signupTab.classList.remove("active");
+        loginForm.style.display = "block";
+        signupForm.style.display = "none";
+        btnText.textContent = "Se connecter";
+        subtitle.textContent = "Connectez-vous à vos souvenirs";
+        message.textContent = "";
+      };
+
+      signupTab.onclick = () => {
+        signupTab.classList.add("active");
+        loginTab.classList.remove("active");
+        signupForm.style.display = "block";
+        loginForm.style.display = "none";
+        btnText.textContent = "Créer mon compte";
+        subtitle.textContent = "Rejoignez votre famille";
+        message.textContent = "";
+      };
+
+      mainBtn.onclick = async () => {
+        message.textContent = "";
+        spinner.style.display = "inline-block";
+        mainBtn.disabled = true;
+
+        if (loginTab.classList.contains("active")) {
+          const email = document.getElementById("loginEmail").value.trim();
+          const password = document.getElementById("loginPassword").value;
+          if (!email || !password) return showError("Tous les champs requis");
+
+          const { data, error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
+          if (error) showError(error.message);
+          else {
+            const { data: profile } = await supabase
+              .from("profiles")
+              .select("role")
+              .eq("id", data.user.id)
+              .single();
+            location.href =
+              profile?.role === "admin" ? "admin.html" : "user.html";
+          }
+        } else {
+          const email = document.getElementById("signupEmail").value.trim();
+          const password = document.getElementById("signupPassword").value;
+          if (!email || password.length < 6)
+            return showError("Email + mot de passe ≥ 6 caractères");
+
+          const { error } = await supabase.auth.signUp({ email, password });
+          if (error) showError(error.message);
+          else showSuccess("Compte créé ! Vous pouvez vous connecter");
+        }
+
+        function showError(msg) {
+          message.textContent = msg;
+          message.className = "error";
+          stop();
+        }
+        function showSuccess(msg) {
+          message.textContent = msg;
+          message.className = "success";
+          stop();
+        }
+        function stop() {
+          spinner.style.display = "none";
+          mainBtn.disabled = false;
+        }
+      };
+    </script>
+  </body>
+</html>
