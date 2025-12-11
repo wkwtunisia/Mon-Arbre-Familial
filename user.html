@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mon Espace Famille</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+    <style>
+      :root {
+        --primary: #11998e;
+        --secondary: #38ef7d;
+        --danger: #e74c3c;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Poppins", sans-serif;
+        background: #f4f7fa;
+        color: #333;
+      }
+      .container {
+        display: flex;
+        min-height: 100vh;
+      }
+      .sidebar {
+        width: 290px;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: white;
+        position: fixed;
+        height: 100%;
+        z-index: 1000;
+        padding-top: 90px;
+        transition: all 0.4s ease;
+        left: -290px;
+        box-shadow: 5px 0 20px rgba(0, 0, 0, 0.2);
+      }
+      .sidebar.active {
+        left: 0;
+      }
+      .sidebar-header {
+        text-align: center;
+        padding: 20px;
+        font-size: 28px;
+        font-weight: 700;
+        background: rgba(0, 0, 0, 0.2);
+      }
+      .sidebar-menu a {
+        display: flex;
+        align-items: center;
+        padding: 20px 30px;
+        color: white;
+        font-size: 18px;
+        text-decoration: none;
+        transition: 0.4s;
+        cursor: pointer;
+        position: relative;
+      }
+      .sidebar-menu a:hover,
+      .sidebar-menu a.active {
+        background: rgba(255, 255, 255, 0.25);
+        padding-left: 50px;
+      }
+      .sidebar-menu a i {
+        margin-right: 15px;
+        font-size: 22px;
+      }
+      .sidebar-menu a::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 5px;
+        height: 100%;
+        background: white;
+        transform: scaleY(0);
+        transition: 0.4s;
+      }
+      .sidebar-menu a.active::before {
+        transform: scaleY(1);
+      }
+      .main {
+        flex: 1;
+        transition: 0.4s;
+        padding: 30px;
+      }
+      .main.shift {
+        margin-left: 290px;
+      }
+      .topbar {
+        background: white;
+        padding: 20px 35px;
+        border-radius: 18px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+      }
+      .menu-btn {
+        font-size: 30px;
+        cursor: pointer;
+        color: var(--primary);
+        transition: 0.3s;
+      }
+      .menu-btn:hover {
+        transform: rotate(90deg);
+      }
+      .content {
+        display: none;
+        padding: 35px;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.1);
+      }
+      .content.active {
+        display: block;
+      }
+      h1 {
+        font-size: 34px;
+        color: var(--primary);
+        margin-bottom: 25px;
+        text-align: center;
+      }
+      .person {
+        position: relative;
+        display: inline-block;
+        background: white;
+        border: 6px solid var(--primary);
+        border-radius: 30px;
+        padding: 25px 30px;
+        margin: 20px;
+        width: 180px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+        cursor: pointer;
+        transition: 0.4s;
+      }
+      .person:hover {
+        transform: translateY(-10px) scale(1.08);
+      }
+      .person.male {
+        border-color: #3498db;
+      }
+      .person.female {
+        border-color: #e91e63;
+      }
+      .person-name {
+        font-size: 24px;
+        font-weight: 700;
+        margin-top: 10px;
+      }
+      .person-actions {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        opacity: 0;
+        transition: 0.3s;
+      }
+      .person:hover .person-actions {
+        opacity: 1;
+      }
+      .delete-btn {
+        font-size: 18px;
+        color: var(--danger);
+        cursor: pointer;
+      }
+      button {
+        background: var(--primary);
+        color: white;
+        padding: 14px 30px;
+        border: none;
+        border-radius: 15px;
+        cursor: pointer;
+        font-size: 17px;
+        margin: 10px 5px;
+        transition: 0.3s;
+      }
+      button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(17, 153, 142, 0.4);
+      }
+      .btn-danger {
+        background: var(--danger);
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 25px;
+        margin-top: 20px;
+      }
+      .photo {
+        position: relative;
+        overflow: hidden;
+        border-radius: 18px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        transition: 0.3s;
+      }
+      .photo:hover {
+        transform: scale(1.05);
+      }
+      .photo img {
+        width: 100%;
+        height: 220px;
+        object-fit: cover;
+      }
+      .photo-actions {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        opacity: 0;
+        transition: 0.3s;
+        background: rgba(0, 0, 0, 0.6);
+        padding: 10px;
+        border-radius: 12px;
+      }
+      .photo:hover .photo-actions {
+        opacity: 1;
+      }
+      .moment {
+        background: white;
+        padding: 25px;
+        border-radius: 18px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">Ma Famille</div>
+        <div class="sidebar-menu">
+          <a onclick="show('tree')" class="active"
+            ><i class="fas fa-tree"></i> Arbre Familial</a
+          >
+          <a onclick="show('gallery')"
+            ><i class="fas fa-images"></i> Galerie Photos</a
+          >
+          <a onclick="show('moments')"
+            ><i class="fas fa-heart"></i> Meilleurs Moments</a
+          >
+          <a onclick="logout()"
+            ><i class="fas fa-sign-out-alt"></i> Déconnexion</a
+          >
+        </div>
+      </div>
+
+      <div class="main" id="main">
+        <div class="topbar">
+          <div class="menu-btn" id="menuBtn">Menu</div>
+          <div>Mon Espace Famille</div>
+        </div>
+
+        <!-- Arbre Familial -->
+        <div id="tree" class="content active">
+          <h1>Mon Arbre Familial</h1>
+          <button onclick="showAddPerson()">Ajouter une personne</button>
+          <div class="tree-container" id="familyTree"></div>
+          <div
+            id="addPersonForm"
+            style="
+              display: none;
+              background: #f8f9fa;
+              padding: 30px;
+              border-radius: 15px;
+              margin-top: 30px;
+            "
+          >
+            <input type="text" id="personName" placeholder="Nom complet" />
+            <select id="personGender">
+              <option value="male">Homme</option>
+              <option value="female">Femme</option>
+            </select>
+            <button onclick="addPerson()">Ajouter</button>
+            <button
+              class="btn-danger"
+              onclick="this.parentElement.style.display='none'"
+            >
+              Annuler
+            </button>
+          </div>
+        </div>
+
+        <!-- Galerie -->
+        <div id="gallery" class="content">
+          <h1>Galerie Photos</h1>
+          <button onclick="document.getElementById('photoInput').click()">
+            Ajouter une photo
+          </button>
+          <input
+            type="file"
+            id="photoInput"
+            accept="image/*"
+            style="display: none"
+            onchange="uploadPhoto(this.files[0])"
+          />
+          <div class="grid" id="photoGrid">Chargement...</div>
+        </div>
+
+        <!-- Moments -->
+        <div id="moments" class="content">
+          <h1>Meilleurs Moments</h1>
+          <button onclick="showAddMoment()">Partager un moment</button>
+          <div
+            id="addMomentForm"
+            style="
+              display: none;
+              background: #f8f9fa;
+              padding: 30px;
+              border-radius: 15px;
+              margin-top: 20px;
+            "
+          >
+            <textarea
+              id="momentText"
+              placeholder="Décris ce moment..."
+              rows="4"
+            ></textarea>
+            <input type="file" accept="image/*" id="momentPhoto" />
+            <button onclick="publishMoment()">Publier</button>
+            <button
+              class="btn-danger"
+              onclick="this.parentElement.style.display='none'"
+            >
+              Annuler
+            </button>
+          </div>
+          <div id="momentsList"></div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+      const supabase = createClient(
+        "https://tvwhnguyzhioamvnuoqu.supabase.co",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2d2huZ3V5emhpb2Ftdm51b3F1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0MzIwNDcsImV4cCI6MjA4MTAwODA0N30.MZIPOZrz5E-o5CWbM7MIkyj8EANNh9MCpIRQQLTi4CY"
+      );
+
+      let currentUser = null;
+      supabase.auth.onAuthStateChange(async (event, session) => {
+        if (!session) {
+          location.href = "index.html";
+          return;
+        }
+        currentUser = session.user;
+        loadFamilyTree();
+        loadPhotos();
+        loadMoments();
+      });
+
+      // Sidebar
+      document.getElementById("menuBtn").onclick = () => {
+        document.getElementById("sidebar").classList.toggle("active");
+        document.getElementById("main").classList.toggle("shift");
+      };
+
+      window.show = function (id) {
+        document
+          .querySelectorAll(".content")
+          .forEach((c) => c.classList.remove("active"));
+        document.getElementById(id).classList.add("active");
+        document
+          .querySelectorAll(".sidebar-menu a")
+          .forEach((a) => a.classList.remove("active"));
+        document
+          .querySelector(`a[onclick="show('${id}')"]`)
+          .classList.add("active");
+      };
+
+      window.logout = async () => {
+        await supabase.auth.signOut();
+        location.href = "index.html";
+      };
+
+      // === Arbre Familial ===
+      async function loadFamilyTree() {
+        const { data } = await supabase
+          .from("family_tree")
+          .select()
+          .eq("user_id", currentUser.id);
+        const container = document.getElementById("familyTree");
+        container.innerHTML = "";
+        data?.forEach((p) => {
+          const div = document.createElement("div");
+          div.className = `person ${p.gender}`;
+          div.innerHTML = `<span style="font-size:50px;">${
+            p.gender === "male" ? "Man" : "Woman"
+          }</span>
+          <div class="person-name">${p.name}</div>
+          <div class="person-actions">
+            <i class="fas fa-trash delete-btn" onclick="deletePerson('${
+              p.id
+            }')"></i>
+          </div>`;
+          container.appendChild(div);
+        });
+      }
+
+      window.showAddPerson = () =>
+        (document.getElementById("addPersonForm").style.display = "block");
+      window.addPerson = async () => {
+        const name = document.getElementById("personName").value.trim();
+        const gender = document.getElementById("personGender").value;
+        if (!name) return alert("Entre un nom");
+        await supabase
+          .from("family_tree")
+          .insert({ user_id: currentUser.id, name, gender });
+        document.getElementById("addPersonForm").style.display = "none";
+        document.getElementById("personName").value = "";
+        loadFamilyTree();
+      };
+
+      window.deletePerson = async (id) => {
+        if (confirm("Supprimer ?")) {
+          await supabase.from("family_tree").delete().eq("id", id);
+          loadFamilyTree();
+        }
+      };
+
+      // === Galerie ===
+      async function loadPhotos() {
+        const { data } = await supabase.storage
+          .from("family-photos")
+          .list("photos");
+        const grid = document.getElementById("photoGrid");
+        grid.innerHTML = data?.length
+          ? ""
+          : '<p style="grid-column:1/-1;text-align:center;color:#777;">Aucune photo</p>';
+        data?.forEach((file) => {
+          const url = supabase.storage
+            .from("family-photos")
+            .getPublicUrl(`photos/${file.name}`).data.publicUrl;
+          const div = document.createElement("div");
+          div.className = "photo";
+          div.innerHTML = `<img src="${url}">
+          <div class="photo-actions">
+            <i class="fas fa-trash delete-btn" onclick="deleteFile('photos/${file.name}')"></i>
+          </div>`;
+          grid.appendChild(div);
+        });
+      }
+
+      window.uploadPhoto = async (file) => {
+        if (!file) return;
+        const fileName = `photos/${Date.now()}_${file.name}`;
+        await supabase.storage.from("family-photos").upload(fileName, file);
+        loadPhotos();
+      };
+
+      window.deleteFile = async (path) => {
+        if (confirm("Supprimer ?")) {
+          await supabase.storage.from("family-photos").remove([path]);
+          loadPhotos();
+        }
+      };
+
+      // === Moments ===
+      async function loadMoments() {
+        const { data } = await supabase
+          .from("family_moments")
+          .select()
+          .eq("user_id", currentUser.id)
+          .order("created_at", { ascending: false });
+        const list = document.getElementById("momentsList");
+        list.innerHTML = "";
+        data?.forEach((m) => {
+          const div = document.createElement("div");
+          div.className = "moment";
+          div.innerHTML = `<p><strong>${new Date(
+            m.created_at
+          ).toLocaleDateString("fr")}</strong></p>
+          <p>${m.text}</p>
+          ${
+            m.photo_url
+              ? `<img src="${m.photo_url}" style="width:100%;border-radius:15px;margin:10px 0;">`
+              : ""
+          }
+          <button class="btn-danger" onclick="deleteMoment('${
+            m.id
+          }')">Supprimer</button>`;
+          list.appendChild(div);
+        });
+      }
+
+      window.showAddMoment = () =>
+        (document.getElementById("addMomentForm").style.display = "block");
+      window.publishMoment = async () => {
+        const text = document.getElementById("momentText").value.trim();
+        const file = document.getElementById("momentPhoto").files[0];
+        if (!text) return alert("Écris un texte");
+        let photo_url = null;
+        if (file) {
+          const fileName = `moments/${Date.now()}_${file.name}`;
+          await supabase.storage.from("family-photos").upload(fileName, file);
+          photo_url = supabase.storage
+            .from("family-photos")
+            .getPublicUrl(fileName).data.publicUrl;
+        }
+        await supabase
+          .from("family_moments")
+          .insert({ user_id: currentUser.id, text, photo_url });
+        document.getElementById("addMomentForm").style.display = "none";
+        document.getElementById("momentText").value = "";
+        document.getElementById("momentPhoto").value = "";
+        loadMoments();
+      };
+
+      window.deleteMoment = async (id) => {
+        if (confirm("Supprimer ?")) {
+          await supabase.from("family_moments").delete().eq("id", id);
+          loadMoments();
+        }
+      };
+    </script>
+  </body>
+</html>
